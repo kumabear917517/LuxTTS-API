@@ -1,171 +1,94 @@
-# LuxTTS
-<p align="center">
-  <a href="https://huggingface.co/YatharthS/LuxTTS">
-    <img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model-FFD21E" alt="Hugging Face Model">
-  </a>
-  &nbsp;
-  <a href="https://huggingface.co/spaces/YatharthS/LuxTTS">
-    <img src="https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Space-blue" alt="Hugging Face Space">
-  </a>
-  &nbsp;
-  <a href="https://colab.research.google.com/drive/1cDaxtbSDLRmu6tRV_781Of_GSjHSo1Cu?usp=sharing">
-    <img src="https://img.shields.io/badge/Colab-Notebook-F9AB00?logo=googlecolab&logoColor=white" alt="Colab Notebook">
-  </a>
-</p>
+# LuxTTS-API
 
-LuxTTS is an lightweight zipvoice based text-to-speech model designed for high quality voice cloning and realistic generation at speeds exceeding 150x realtime.
+[中文文档](README_CN.md)
 
-https://github.com/user-attachments/assets/a3b57152-8d97-43ce-bd99-26dc9a145c29
+A local **FastAPI REST API** and **Gradio Web UI** service for the [LuxTTS](https://github.com/ysharma3501/LuxTTS) voice cloning model.
 
+## Features
 
-### The main features are
-- Voice cloning: SOTA voice cloning on par with models 10x larger.
-- Clarity: Clear 48khz speech generation unlike most TTS models which are limited to 24khz.
-- Speed: Reaches speeds of 150x realtime on a single GPU and faster then realtime on CPU's as well.
-- Efficiency: Fits within 1gb vram meaning it can fit in any local gpu.
+- 🎙️ **Voice Cloning API** — Upload reference audio + text, get cloned speech back
+- 🖥️ **Gradio Web UI** — Browser-based visual interface
+- 📖 **Swagger Docs** — Interactive API documentation with built-in testing
+- 🔧 **Encoding Compatibility** — Auto-handles Windows curl GBK encoding for CJK text
 
-## Usage
-You can try it locally, colab, or spaces.
+## Quick Start
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1cDaxtbSDLRmu6tRV_781Of_GSjHSo1Cu?usp=sharing)
-[![Open in Spaces](https://huggingface.co/datasets/huggingface/badges/resolve/main/open-in-hf-spaces-sm.svg)](https://huggingface.co/spaces/YatharthS/LuxTTS)
+### 1. Setup
 
-#### Simple installation:
-```
-git clone https://github.com/ysharma3501/LuxTTS.git
-cd LuxTTS
+Clone the [LuxTTS](https://github.com/ysharma3501/LuxTTS) project and download model weights to the `checkpoints/` directory, then:
+
+```bash
 pip install -r requirements.txt
 ```
 
-#### Load model:
-```python
-from zipvoice.luxvoice import LuxTTS
+### 2. Launch
 
-# load model on GPU
-lux_tts = LuxTTS('YatharthS/LuxTTS', device='cuda')
-
-# load model on CPU
-# lux_tts = LuxTTS('YatharthS/LuxTTS', device='cpu', threads=2)
-
-# load model on MPS for macs
-# lux_tts = LuxTTS('YatharthS/LuxTTS', device='mps')
+```bash
+python app.py
 ```
 
-#### Simple inference
-```python
-import soundfile as sf
-from IPython.display import Audio
+Or double-click `runapi.bat` (Windows).
 
-text = "Hey, what's up? I'm feeling really great if you ask me honestly!"
+### 3. Access
 
-## change this to your reference file path, can be wav/mp3
-prompt_audio = 'audio_file.wav'
-
-## encode audio(takes 10s to init because of librosa first time)
-encoded_prompt = lux_tts.encode_prompt(prompt_audio, rms=0.01)
-
-## generate speech
-final_wav = lux_tts.generate_speech(text, encoded_prompt, num_steps=4)
-
-## save audio
-final_wav = final_wav.numpy().squeeze()
-sf.write('output.wav', final_wav, 48000)
-
-## display speech
-if display is not None:
-  display(Audio(final_wav, rate=48000))
-```
-
-#### Inference with sampling params:
-```python
-import soundfile as sf
-from IPython.display import Audio
-
-text = "Hey, what's up? I'm feeling really great if you ask me honestly!"
-
-## change this to your reference file path, can be wav/mp3
-prompt_audio = 'audio_file.wav'
-
-rms = 0.01 ## higher makes it sound louder(0.01 or so recommended)
-t_shift = 0.9 ## sampling param, higher can sound better but worse WER
-num_steps = 4 ## sampling param, higher sounds better but takes longer(3-4 is best for efficiency)
-speed = 1.0 ## sampling param, controls speed of audio(lower=slower)
-return_smooth = False ## sampling param, makes it sound smoother possibly but less cleaner
-ref_duration = 5 ## Setting it lower can speedup inference, set to 1000 if you find artifacts.
-
-## encode audio(takes 10s to init because of librosa first time)
-encoded_prompt = lux_tts.encode_prompt(prompt_audio, duration=ref_duration, rms=rms)
-
-## generate speech
-final_wav = lux_tts.generate_speech(text, encoded_prompt, num_steps=num_steps, t_shift=t_shift, speed=speed, return_smooth=return_smooth)
-
-## save audio
-final_wav = final_wav.numpy().squeeze()
-sf.write('output.wav', final_wav, 48000)
-
-## display speech
-if display is not None:
-  display(Audio(final_wav, rate=48000))
-```
-## Tips
-- Please use at minimum a 3 second audio file for voice cloning.
-- You can use return_smooth = True if you hear metallic sounds.
-- Lower t_shift for less possible pronunciation errors but worse quality and vice versa.
+| URL | Description |
+|---|---|
+| `http://127.0.0.1:7860/` | Redirects to Gradio UI |
+| `http://127.0.0.1:7860/ui/` | Gradio Web UI |
+| `http://127.0.0.1:7860/docs` | Swagger Interactive API Docs |
 
 ---
 
-## API 接口
+## API Reference
 
-服务启动后（`runapi.bat` 或 `python app.py`），提供以下 HTTP 接口，默认端口 `7860`。
-
-### 健康检查
+### Health Check
 
 ```
 GET /api/health
 ```
 
-**响应示例：**
+**Response:**
 ```json
 {"status": "ok", "device": "cuda"}
 ```
 
-### 语音合成
+### Text-to-Speech
 
 ```
 POST /api/tts
 Content-Type: multipart/form-data
 ```
 
-**参数：**
+**Parameters:**
 
-| 参数 | 类型 | 必填 | 默认值 | 说明 |
+| Parameter | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `text` | string | ✅ | — | 待合成的文本 |
-| `audio_prompt` | file | ✅ | — | 参考音频文件（WAV/MP3） |
-| `rms` | float | ❌ | 0.01 | 响度控制，越大声音越大 |
-| `ref_duration` | float | ❌ | 5 | 参考音频截取时长（秒），越小越快，音质异常时可调大 |
-| `t_shift` | float | ❌ | 0.9 | 音色偏移，越高音质越好但可能出错 |
-| `num_steps` | int | ❌ | 4 | 采样步数，越高越好但越慢（3-4 最佳） |
-| `speed` | float | ❌ | 0.8 | 语速，越小越慢/越清晰 |
-| `return_smooth` | bool | ❌ | false | 启用平滑输出，有金属音时可开启 |
-| `output_format` | string | ❌ | wav | 输出格式：`wav` 或 `mp3`（MP3 需要安装 ffmpeg） |
+| `text` | string | ✅ | — | Text to synthesize |
+| `audio_prompt` | file | ✅ | — | Reference audio file (WAV/MP3) |
+| `rms` | float | ❌ | 0.01 | Loudness control; higher = louder |
+| `ref_duration` | float | ❌ | 5 | Reference audio clip length (seconds); shorter = faster, increase if quality issues |
+| `t_shift` | float | ❌ | 0.9 | Timbre shift; higher = better quality but may cause errors |
+| `num_steps` | int | ❌ | 4 | Sampling steps; higher = better but slower (3–4 optimal) |
+| `speed` | float | ❌ | 0.8 | Speech rate; lower = slower/clearer |
+| `return_smooth` | bool | ❌ | false | Enable smooth output; turn on if you hear metallic artifacts |
+| `output_format` | string | ❌ | wav | Output format: `wav` or `mp3` (MP3 requires ffmpeg) |
 
-**响应：** 音频文件流（`audio/wav` 或 `audio/mpeg`）
+**Response:** Audio file stream (`audio/wav` or `audio/mpeg`)
 
-### 调用示例
+### Examples
 
-**curl（命令行）：**
+**curl:**
 ```bash
 curl -X POST http://127.0.0.1:7860/api/tts \
-  -F "text=你好，这是语音克隆的测试效果" \
+  -F "text=Hello, this is a voice cloning test" \
   -F "audio_prompt=@voice_ref.wav" \
   -o output.wav
 ```
 
-带可选参数：
+With optional parameters:
 ```bash
 curl -X POST http://127.0.0.1:7860/api/tts \
-  -F "text=你好，今天天气真不错" \
+  -F "text=The weather is really nice today" \
   -F "audio_prompt=@voice_ref.wav" \
   -F "speed=0.7" \
   -F "num_steps=6" \
@@ -173,7 +96,7 @@ curl -X POST http://127.0.0.1:7860/api/tts \
   -o output.wav
 ```
 
-**Python（requests）：**
+**Python (requests):**
 ```python
 import requests
 
@@ -181,7 +104,7 @@ url = "http://127.0.0.1:7860/api/tts"
 
 with open("voice_ref.wav", "rb") as f:
     resp = requests.post(url, data={
-        "text": "你好，这是语音克隆的测试效果",
+        "text": "Hello, this is a voice cloning test",
         "speed": 0.8,
         "num_steps": 4,
     }, files={
@@ -190,10 +113,10 @@ with open("voice_ref.wav", "rb") as f:
 
 with open("output.wav", "wb") as out:
     out.write(resp.content)
-print("已保存到 output.wav")
+print("Saved to output.wav")
 ```
 
-**Python（httpx + 异步）：**
+**Python (httpx, async):**
 ```python
 import httpx
 import asyncio
@@ -208,74 +131,47 @@ async def tts(text: str, ref_audio: str, output: str = "output.wav"):
             )
         with open(output, "wb") as out:
             out.write(resp.content)
-    print(f"已保存到 {output}")
+    print(f"Saved to {output}")
 
-asyncio.run(tts("你好，这是语音克隆的测试效果", "voice_ref.wav"))
+asyncio.run(tts("Hello, this is a voice cloning test", "voice_ref.wav"))
 ```
 
-### 其他地址
+---
 
-| 路径 | 说明 |
-|---|---|
-| `http://127.0.0.1:7860/` | 自动跳转到 Gradio UI |
-| `http://127.0.0.1:7860/ui/` | Gradio Web UI |
-| `http://127.0.0.1:7860/docs` | Swagger 交互式 API 文档 |
+## Notes
 
-### 注意事项
+- Reference audio should be at least 3 seconds; clearer audio = better cloning
+- If you encounter skipped words, try lowering `speed` or increasing `ref_duration`
 
-- 参考音频至少 3 秒，越清晰克隆效果越好
-- 如果出现"吞字/断词"，请降低语速（`speed`）或增大参考音频时长（`ref_duration`）
+## Troubleshooting: Windows CJK Encoding Issue
 
-### 踩坑记录：Windows 中文编码问题
+**Symptom:** English TTS works fine (curl returns 200), but Chinese/CJK TTS returns 500 Internal Server Error.
 
-**现象：** 英文 TTS 正常（curl 返回 200），中文 TTS 返回 500 Internal Server Error。
+**Root cause:** Windows `curl` encodes multipart form fields in GBK by default. FastAPI/uvicorn parses them as latin-1 (per HTTP spec), turning CJK characters into mojibake. The garbled text fails tokenization in the TTS model, producing insufficient audio frames and triggering an exception.
 
-**原因：** Windows 的 `curl` 默认用 GBK 编码发送 multipart form 表单字段中的中文文本。而 FastAPI/uvicorn 底层按 latin-1 解析 multipart 字段，导致中文变成乱码。乱码文本送入 TTS 模型后，分词器无法识别，生成的音频帧数不足，最终抛出异常返回 500。
-
-**编码链路：**
+**Encoding chain:**
 ```
-curl 发送 GBK bytes → FastAPI 按 latin-1 解析 → 中文变乱码 → 模型分词失败 → 500
+curl sends GBK bytes → FastAPI parses as latin-1 → CJK becomes mojibake → model tokenizer fails → 500
 ```
 
-**修复方法：** 在 API handler 中加入编码修复，将 FastAPI 解析出的乱码文本还原为正确的 UTF-8/GBK：
+**Fix:** Add encoding recovery in the API handler to restore the original bytes:
 ```python
-# latin-1 是单字节编码，encode('latin-1') 可以还原出原始字节
+# latin-1 is a single-byte encoding, encode('latin-1') recovers raw bytes
 raw_bytes = text.encode('latin-1')
 try:
-    text = raw_bytes.decode('utf-8')   # Python 客户端发的 UTF-8
+    text = raw_bytes.decode('utf-8')   # Python clients send UTF-8
 except UnicodeDecodeError:
-    text = raw_bytes.decode('gbk')     # Windows curl 发的 GBK
+    text = raw_bytes.decode('gbk')     # Windows curl sends GBK
 ```
 
-**注意：** Python 的 `requests` 库默认用 UTF-8 发送 multipart，不受此问题影响。纯 Windows curl 命令行才会触发。
+**Note:** Python's `requests` library sends multipart as UTF-8 by default and is not affected. This issue only occurs with Windows curl from the command line.
 
+## Acknowledgements
 
-## Info
+- [LuxTTS](https://github.com/ysharma3501/LuxTTS) — Original voice cloning model
+- [ZipVoice](https://github.com/k2-fsa/ZipVoice) — Underlying TTS architecture
+- [Vocos](https://github.com/gemelo-ai/vocos.git) — 48kHz vocoder
 
-Q: How is this different from ZipVoice?
+## License
 
-A: LuxTTS uses the same architecture but distilled to 4 steps with an improved sampling technique. It also uses a custom 48khz vocoder instead of the default 24khz version.
-
-Q: Can it be even faster?
-
-A: Yes, currently it uses float32. Float16 should be significantly faster(almost 2x).
-
-## Roadmap
-
-- [x] Release model and code
-- [x] Huggingface spaces demo
-- [x] Release MPS support (thanks to @builtbybasit)
-- [ ] Release code for float16 inference
-
-## Acknowledgments
-
-- [ZipVoice](https://github.com/k2-fsa/ZipVoice) for their excellent code and model.
-- [Vocos](https://github.com/gemelo-ai/vocos.git) for their great vocoder.
-  
-## Final Notes
-
-The model and code are licensed under the Apache-2.0 license. See LICENSE for details.
-
-Stars/Likes would be appreciated, thank you.
-
-Email: yatharthsharma350@gmail.com
+Apache-2.0
