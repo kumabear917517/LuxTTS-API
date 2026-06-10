@@ -2,21 +2,23 @@
 
 [中文文档](README_CN.md)
 
-A **FastAPI REST API** service for the [LuxTTS](https://github.com/ysharma3501/LuxTTS) voice cloning model, built on top of [LuxTTS-Gradio](https://github.com/NidAll/LuxTTS-Gradio).
+A **FastAPI REST API** service for the [LuxTTS](https://github.com/ysharma3501/LuxTTS) voice cloning model.
 
-This project adds a standard HTTP API layer to LuxTTS, making it easy to integrate with other applications (chatbots, virtual pets, automation tools, etc.). The Gradio Web UI is provided by the upstream project.
+This project provides a standard HTTP API layer for LuxTTS, making it easy to integrate with other applications (chatbots, virtual pets, automation tools, etc.). Optionally supports [Gradio Web UI](https://github.com/NidAll/LuxTTS-Gradio) when installed.
 
 ## Features
 
 - 🎙️ **Voice Cloning API** — Upload reference audio + text, get cloned speech back
 - 📖 **Swagger Docs** — Interactive API documentation with built-in testing
+- 🖥️ **Gradio UI (Optional)** — Browser-based visual interface, auto-detected
 - 🔧 **Encoding Compatibility** — Auto-handles Windows curl GBK encoding for CJK text
+- 🚀 **Offline Support** — Uses local model cache by default, works without internet
 
 ## Quick Start
 
 ### 1. Setup
 
-This repo only contains the API layer. You need the LuxTTS + Gradio project first:
+This repo only contains the API layer. You need the LuxTTS project first:
 
 ```bash
 # 1. Clone LuxTTS-Gradio (includes LuxTTS model + Gradio UI)
@@ -25,8 +27,18 @@ cd LuxTTS-Gradio
 
 # 2. Download model weights to checkpoints/ (see original repo for download links)
 
-# 3. Install dependencies
+# 3. Install dependencies (includes Gradio)
 pip install -r requirements.txt
+```
+
+**API-only mode (without Gradio):** If you only need the API and want a lighter setup:
+
+```bash
+# Install only the core dependencies (no Gradio)
+pip install torch fastapi uvicorn numpy torchaudio transformers huggingface_hub lhotse librosa safetensors
+
+# Then launch — Gradio UI will be automatically skipped
+python app.py
 ```
 
 Then copy `app.py` and `runapi.bat` from this repo into the project directory (this replaces the original `app.py`):
@@ -49,8 +61,8 @@ Or double-click `runapi.bat` (Windows).
 
 | URL | Description |
 |---|---|
-| `http://127.0.0.1:7860/` | Redirects to Gradio UI |
-| `http://127.0.0.1:7860/ui/` | Gradio Web UI |
+| `http://127.0.0.1:7860/` | Redirects to Gradio UI (or `/docs` if Gradio not installed) |
+| `http://127.0.0.1:7860/ui/` | Gradio Web UI (only if Gradio is installed) |
 | `http://127.0.0.1:7860/docs` | Swagger Interactive API Docs |
 
 ---

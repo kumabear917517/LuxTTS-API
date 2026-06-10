@@ -10,15 +10,25 @@ warnings.filterwarnings('ignore')
 
 # ===================== 核心：代码内设置 HF 镜像 =====================
 os.environ["HF_ENDPOINT"] = "https://hf-mirror.com"
+# 优先使用本地缓存，断网也能正常加载模型
+# 如果本地没有缓存，首次运行需要联网下载，去掉下面这行即可
+os.environ["HF_HUB_OFFLINE"] = "1"
 
 import numpy as np
-import gradio as gr
 import torch
 import uvicorn
 from fastapi import FastAPI, Request, UploadFile, File, Form, HTTPException
 from fastapi.responses import StreamingResponse
-from gradio import mount_gradio_app
 from zipvoice.luxvoice import LuxTTS
+
+# 检测 Gradio 是否安装（可选依赖）
+GRADIO_AVAILABLE = False
+try:
+    import gradio as gr
+    from gradio import mount_gradio_app
+    GRADIO_AVAILABLE = True
+except ImportError:
+    pass
 
 # Init Model
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -75,7 +85,9 @@ app = FastAPI(title="LuxTTS API", description="LuxTTS 语音克隆 API")
 @app.get("/", include_in_schema=False)
 async def root():
     from fastapi.responses import RedirectResponse
-    return RedirectResponse(url="/ui/")
+    if GRADIO_AVAILABLE:
+        return RedirectResponse(url="/ui/")
+    return RedirectResponse(url="/docs")
 
 
 def _wav_to_bytes(wav_np: np.ndarray, sample_rate: int = 48000) -> bytes:
@@ -108,7 +120,6 @@ async def api_tts(
         raise HTTPException(status_code=400, detail="文本不能为空")
 
     # 修复 Windows 下 multipart 中文编码问题：
-    print(f'[DEBUG] 原始 text repr: {repr(text)}')
     try:
         raw_bytes = text.encode('latin-1')
         try:
@@ -117,7 +128,6 @@ async def api_tts(
             text = raw_bytes.decode('gbk')
     except (UnicodeDecodeError, UnicodeEncodeError):
         pass
-    print(f'[DEBUG] 修复后 text: {text}')
 
     # 将上传的音频写入临时文件
     suffix = Path(audio_prompt.filename or "ref.wav").suffix or ".wav"
@@ -179,94 +189,100 @@ async def api_tts(
 
 @app.get("/api/health", summary="健康检查")
 async def health():
-    return {"status": "ok", "device": device}
+    return {"status": "ok", "device": device, "gradio": GRADIO_AVAILABLE}
 
 
 # =======================
-# Gradio UI
+# Gradio UI（可选）
 # =======================
-with gr.Blocks(theme=gr.themes.Soft()) as demo:
-    gr.Markdown("# 🎙️ LuxTTS 语音克隆演示")
+if GRADIO_AVAILABLE:
+    with gr.Blocks(theme=gr.themes.Soft()) as demo:
+        gr.Markdown("# 🎙️ LuxTTS 语音克隆演示")
 
-    gr.Markdown(
-        """
-        > **说明：** 当前示例默认运行在 **2 核 CPU** 上，推理速度可能较慢。
-        > **使用建议：**
-        > - 如果出现"吞字 / 断词"，请 **降低语速（Speed）** 或 **增大参考音频时长**
-        > - 参考音频越清晰，克隆效果越稳定
-        """
-    )
+        gr.Markdown(
+            """
+            > **说明：** 当前示例默认运行在 **2 核 CPU** 上，推理速度可能较慢。
+            > **使用建议：**
+            > - 如果出现"吞字 / 断词"，请 **降低语速（Speed）** 或 **增大参考音频时长**
+            > - 参考音频越清晰，克隆效果越稳定
+            """
+        )
 
-    with gr.Row():
-        with gr.Column():
-            input_text = gr.Textbox(
-                label="待合成文本",
-                value="你好，这是一个语音克隆的示例效果。",
-            )
-
-            input_audio = gr.Audio(
-                label="参考音频（WAV 格式）",
-                type="filepath",
-            )
-
-            with gr.Row():
-                rms_val = gr.Number(
-                    value=0.01,
-                    label="RMS 音量（响度）",
-                )
-                ref_duration_val = gr.Number(
-                    value=5,
-                    label="参考音频时长（秒）",
-                    info="越小越快，若出现音质异常可设置较大值（如 10~20）",
-                )
-                t_shift_val = gr.Number(
-                    value=0.9,
-                    label="T-Shift（音色偏移）",
+        with gr.Row():
+            with gr.Column():
+                input_text = gr.Textbox(
+                    label="待合成文本",
+                    value="你好，这是一个语音克隆的示例效果。",
                 )
 
-            with gr.Row():
-                steps_val = gr.Slider(
-                    1,
-                    10,
-                    value=4,
-                    step=1,
-                    label="采样步数（Steps）",
-                )
-                speed_val = gr.Slider(
-                    0.5,
-                    2.0,
-                    value=0.8,
-                    step=0.1,
-                    label="语速（越小越慢 / 越清晰）",
-                )
-                smooth_val = gr.Checkbox(
-                    label="启用平滑输出",
-                    value=False,
+                input_audio = gr.Audio(
+                    label="参考音频（WAV 格式）",
+                    type="filepath",
                 )
 
-            btn = gr.Button("开始生成语音", variant="primary")
+                with gr.Row():
+                    rms_val = gr.Number(
+                        value=0.01,
+                        label="RMS 音量（响度）",
+                    )
+                    ref_duration_val = gr.Number(
+                        value=5,
+                        label="参考音频时长（秒）",
+                        info="越小越快，若出现音质异常可设置较大值（如 10~20）",
+                    )
+                    t_shift_val = gr.Number(
+                        value=0.9,
+                        label="T-Shift（音色偏移）",
+                    )
 
-        with gr.Column():
-            audio_out = gr.Audio(label="生成结果")
-            status_text = gr.Markdown("🟢 等待生成中…")
+                with gr.Row():
+                    steps_val = gr.Slider(
+                        1,
+                        10,
+                        value=4,
+                        step=1,
+                        label="采样步数（Steps）",
+                    )
+                    speed_val = gr.Slider(
+                        0.5,
+                        2.0,
+                        value=0.8,
+                        step=0.1,
+                        label="语速（越小越慢 / 越清晰）",
+                    )
+                    smooth_val = gr.Checkbox(
+                        label="启用平滑输出",
+                        value=False,
+                    )
 
-    btn.click(
-        fn=infer,
-        inputs=[
-            input_text,
-            input_audio,
-            rms_val,
-            ref_duration_val,
-            t_shift_val,
-            steps_val,
-            speed_val,
-            smooth_val,
-        ],
-        outputs=[audio_out, status_text],
-    )
+                btn = gr.Button("开始生成语音", variant="primary")
 
-# 将 Gradio 挂载到 FastAPI，路径为 /ui
-mount_gradio_app(app, demo, path="/ui")
+            with gr.Column():
+                audio_out = gr.Audio(label="生成结果")
+                status_text = gr.Markdown("🟢 等待生成中…")
+
+        btn.click(
+            fn=infer,
+            inputs=[
+                input_text,
+                input_audio,
+                rms_val,
+                ref_duration_val,
+                t_shift_val,
+                steps_val,
+                speed_val,
+                smooth_val,
+            ],
+            outputs=[audio_out, status_text],
+        )
+
+    # 将 Gradio 挂载到 FastAPI，路径为 /ui
+    mount_gradio_app(app, demo, path="/ui")
+    print("Gradio UI enabled at /ui/")
+else:
+    print("Gradio not installed, running in API-only mode.")
+    print("Install Gradio with: pip install gradio")
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=7860)

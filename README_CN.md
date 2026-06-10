@@ -2,9 +2,9 @@
 
 [English](README.md)
 
-该项目为 [LuxTTS](https://github.com/ysharma3501/LuxTTS) 语音克隆模型提供 **FastAPI REST API** 接口，基于 [LuxTTS-Gradio](https://github.com/NidAll/LuxTTS-Gradio) 项目构建。
+该项目为 [LuxTTS](https://github.com/ysharma3501/LuxTTS) 语音克隆模型提供 **FastAPI REST API** 接口。
 
-本项目在 LuxTTS-Gradio 的基础上增加了标准 HTTP API 层，方便与其他应用集成（聊天机器人、桌面宠物、自动化工具等）。Gradio Web UI 由上游项目提供。
+本项目为 LuxTTS 提供标准 HTTP API 层，方便与其他应用集成（聊天机器人、桌面宠物、自动化工具等）。可选安装 [Gradio Web UI](https://github.com/NidAll/LuxTTS-Gradio) 提供浏览器可视化界面。
 
 ## 功能
 
