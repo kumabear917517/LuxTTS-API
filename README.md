@@ -15,10 +15,25 @@ A local **FastAPI REST API** and **Gradio Web UI** service for the [LuxTTS](http
 
 ### 1. Setup
 
-Clone the [LuxTTS](https://github.com/ysharma3501/LuxTTS) project and download model weights to the `checkpoints/` directory, then:
+This repo only contains the API layer. You need the original LuxTTS project first:
 
 ```bash
+# 1. Clone the original LuxTTS project
+git clone https://github.com/ysharma3501/LuxTTS.git
+cd LuxTTS
+
+# 2. Download model weights to checkpoints/ (see original repo for download links)
+
+# 3. Install dependencies
 pip install -r requirements.txt
+```
+
+Then copy `app.py` and `runapi.bat` from this repo into the LuxTTS directory:
+
+```bash
+# Download only the API files
+curl -O https://raw.githubusercontent.com/kumabear917517/LuxTTS-API/main/app.py
+curl -O https://raw.githubusercontent.com/kumabear917517/LuxTTS-API/main/runapi.bat
 ```
 
 ### 2. Launch

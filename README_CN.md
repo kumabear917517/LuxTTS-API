@@ -15,10 +15,25 @@
 
 ### 1. 安装
 
-先克隆 [LuxTTS 原项目](https://github.com/ysharma3501/LuxTTS) 并下载模型权重到 `checkpoints/` 目录，然后：
+本仓库仅包含 API 层代码，需要先准备原项目环境：
 
 ```bash
+# 1. 克隆 LuxTTS 原项目
+git clone https://github.com/ysharma3501/LuxTTS.git
+cd LuxTTS
+
+# 2. 下载模型权重到 checkpoints/ 目录（见原项目说明）
+
+# 3. 安装依赖
 pip install -r requirements.txt
+```
+
+然后将本仓库的 API 文件复制到 LuxTTS 目录下：
+
+```bash
+# 只下载 API 相关文件
+curl -O https://raw.githubusercontent.com/kumabear917517/LuxTTS-API/main/app.py
+curl -O https://raw.githubusercontent.com/kumabear917517/LuxTTS-API/main/runapi.bat
 ```
 
 ### 2. 启动

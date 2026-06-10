@@ -195,8 +195,17 @@ cython_debug/
 .cursorindexingignore
 
 # =====================
-# LuxTTS 项目排除项
+# LuxTTS-API 项目排除项
 # =====================
+
+# 原项目代码（用户自行从 LuxTTS 仓库获取）
+linacodec/
+zipvoice/
+vocos/
+pyproject.toml
+run.bat
+LICENSE
+voice_ref.wav
 
 # 内置 Python 环境（9GB+）
 python/
@@ -207,6 +216,10 @@ whisper-base/
 
 # 生成的测试文件
 test_output.wav
+
+# 广告素材
+公众号持续免费分享*.jpg
+素材资源网*.url
 
 # WorkBuddy 工作目录
 .workbuddy/
