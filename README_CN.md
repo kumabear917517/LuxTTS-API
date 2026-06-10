@@ -19,14 +19,14 @@
 本仓库仅包含 API 层代码，需要先准备基础环境：
 
 ```bash
-# 1. 克隆 LuxTTS-Gradio 项目（包含 LuxTTS 模型 + Gradio UI）
-git clone https://github.com/NidAll/LuxTTS-Gradio.git
-cd LuxTTS-Gradio
+# 1. 克隆 LuxTTS 原项目
+git clone https://github.com/ysharma3501/LuxTTS.git
+cd LuxTTS
 
 # 2. 下载模型权重到 checkpoints/ 目录（见原项目说明）
 
-# 3. 安装依赖
-pip install -r requirements.txt
+# 3. 安装核心依赖
+pip install torch fastapi uvicorn numpy torchaudio transformers huggingface_hub lhotse librosa safetensors
 ```
 
 然后将本仓库的 API 文件复制到项目目录下（会覆盖原 app.py）：
@@ -36,6 +36,15 @@ pip install -r requirements.txt
 curl -O https://raw.githubusercontent.com/kumabear917517/LuxTTS-API/main/app.py
 curl -O https://raw.githubusercontent.com/kumabear917517/LuxTTS-API/main/runapi.bat
 ```
+
+**可选：Gradio Web UI** — 如果你还需要浏览器可视化操作界面：
+
+```bash
+pip install gradio
+# 安装后 Gradio UI 会自动在 /ui/ 路径启用
+```
+
+也可以直接使用 [LuxTTS-Gradio](https://github.com/NidAll/LuxTTS-Gradio) 作为基础项目，它内置了 Gradio UI。
 
 ### 2. 启动
 

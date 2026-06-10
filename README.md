@@ -21,24 +21,14 @@ This project provides a standard HTTP API layer for LuxTTS, making it easy to in
 This repo only contains the API layer. You need the LuxTTS project first:
 
 ```bash
-# 1. Clone LuxTTS-Gradio (includes LuxTTS model + Gradio UI)
-git clone https://github.com/NidAll/LuxTTS-Gradio.git
-cd LuxTTS-Gradio
+# 1. Clone the original LuxTTS project
+git clone https://github.com/ysharma3501/LuxTTS.git
+cd LuxTTS
 
 # 2. Download model weights to checkpoints/ (see original repo for download links)
 
-# 3. Install dependencies (includes Gradio)
-pip install -r requirements.txt
-```
-
-**API-only mode (without Gradio):** If you only need the API and want a lighter setup:
-
-```bash
-# Install only the core dependencies (no Gradio)
+# 3. Install core dependencies
 pip install torch fastapi uvicorn numpy torchaudio transformers huggingface_hub lhotse librosa safetensors
-
-# Then launch — Gradio UI will be automatically skipped
-python app.py
 ```
 
 Then copy `app.py` and `runapi.bat` from this repo into the project directory (this replaces the original `app.py`):
@@ -48,6 +38,15 @@ Then copy `app.py` and `runapi.bat` from this repo into the project directory (t
 curl -O https://raw.githubusercontent.com/kumabear917517/LuxTTS-API/main/app.py
 curl -O https://raw.githubusercontent.com/kumabear917517/LuxTTS-API/main/runapi.bat
 ```
+
+**Optional: Gradio Web UI** — If you also want the browser-based visual interface:
+
+```bash
+pip install gradio
+# Gradio UI will be automatically enabled at /ui/ when installed
+```
+
+Or use [LuxTTS-Gradio](https://github.com/NidAll/LuxTTS-Gradio) as the base project instead, which bundles Gradio UI out of the box.
 
 ### 2. Launch
 
