@@ -2,12 +2,13 @@
 
 [中文文档](README_CN.md)
 
-A local **FastAPI REST API** and **Gradio Web UI** service for the [LuxTTS](https://github.com/ysharma3501/LuxTTS) voice cloning model.
+A **FastAPI REST API** service for the [LuxTTS](https://github.com/ysharma3501/LuxTTS) voice cloning model, built on top of [LuxTTS-Gradio](https://github.com/NidAll/LuxTTS-Gradio).
+
+This project adds a standard HTTP API layer to LuxTTS, making it easy to integrate with other applications (chatbots, virtual pets, automation tools, etc.). The Gradio Web UI is provided by the upstream project.
 
 ## Features
 
 - 🎙️ **Voice Cloning API** — Upload reference audio + text, get cloned speech back
-- 🖥️ **Gradio Web UI** — Browser-based visual interface
 - 📖 **Swagger Docs** — Interactive API documentation with built-in testing
 - 🔧 **Encoding Compatibility** — Auto-handles Windows curl GBK encoding for CJK text
 
@@ -15,12 +16,12 @@ A local **FastAPI REST API** and **Gradio Web UI** service for the [LuxTTS](http
 
 ### 1. Setup
 
-This repo only contains the API layer. You need the original LuxTTS project first:
+This repo only contains the API layer. You need the LuxTTS + Gradio project first:
 
 ```bash
-# 1. Clone the original LuxTTS project
-git clone https://github.com/ysharma3501/LuxTTS.git
-cd LuxTTS
+# 1. Clone LuxTTS-Gradio (includes LuxTTS model + Gradio UI)
+git clone https://github.com/NidAll/LuxTTS-Gradio.git
+cd LuxTTS-Gradio
 
 # 2. Download model weights to checkpoints/ (see original repo for download links)
 
@@ -28,10 +29,10 @@ cd LuxTTS
 pip install -r requirements.txt
 ```
 
-Then copy `app.py` and `runapi.bat` from this repo into the LuxTTS directory:
+Then copy `app.py` and `runapi.bat` from this repo into the project directory (this replaces the original `app.py`):
 
 ```bash
-# Download only the API files
+# Download only the API files (overwrite original app.py)
 curl -O https://raw.githubusercontent.com/kumabear917517/LuxTTS-API/main/app.py
 curl -O https://raw.githubusercontent.com/kumabear917517/LuxTTS-API/main/runapi.bat
 ```
@@ -183,6 +184,7 @@ except UnicodeDecodeError:
 
 ## Acknowledgements
 
+- [LuxTTS-Gradio](https://github.com/NidAll/LuxTTS-Gradio) — Gradio Web UI for LuxTTS (upstream of this project)
 - [LuxTTS](https://github.com/ysharma3501/LuxTTS) — Original voice cloning model
 - [ZipVoice](https://github.com/k2-fsa/ZipVoice) — Underlying TTS architecture
 - [Vocos](https://github.com/gemelo-ai/vocos.git) — 48kHz vocoder

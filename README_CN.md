@@ -2,12 +2,13 @@
 
 [English](README.md)
 
-该项目是为 [LuxTTS](https://github.com/ysharma3501/LuxTTS) 语音克隆模型提供 **FastAPI REST API** 和 **Gradio Web UI** 的本地服务。
+该项目为 [LuxTTS](https://github.com/ysharma3501/LuxTTS) 语音克隆模型提供 **FastAPI REST API** 接口，基于 [LuxTTS-Gradio](https://github.com/NidAll/LuxTTS-Gradio) 项目构建。
+
+本项目在 LuxTTS-Gradio 的基础上增加了标准 HTTP API 层，方便与其他应用集成（聊天机器人、桌面宠物、自动化工具等）。Gradio Web UI 由上游项目提供。
 
 ## 功能
 
 - 🎙️ **语音克隆 API** — 上传参考音频 + 文本，返回克隆语音
-- 🖥️ **Gradio Web UI** — 浏览器可视化操作界面
 - 📖 **Swagger 文档** — 交互式 API 文档，可直接在线测试
 - 🔧 **编码兼容** — 自动处理 Windows curl 中文 GBK 编码问题
 
@@ -15,12 +16,12 @@
 
 ### 1. 安装
 
-本仓库仅包含 API 层代码，需要先准备原项目环境：
+本仓库仅包含 API 层代码，需要先准备基础环境：
 
 ```bash
-# 1. 克隆 LuxTTS 原项目
-git clone https://github.com/ysharma3501/LuxTTS.git
-cd LuxTTS
+# 1. 克隆 LuxTTS-Gradio 项目（包含 LuxTTS 模型 + Gradio UI）
+git clone https://github.com/NidAll/LuxTTS-Gradio.git
+cd LuxTTS-Gradio
 
 # 2. 下载模型权重到 checkpoints/ 目录（见原项目说明）
 
@@ -28,10 +29,10 @@ cd LuxTTS
 pip install -r requirements.txt
 ```
 
-然后将本仓库的 API 文件复制到 LuxTTS 目录下：
+然后将本仓库的 API 文件复制到项目目录下（会覆盖原 app.py）：
 
 ```bash
-# 只下载 API 相关文件
+# 只下载 API 相关文件（覆盖原有 app.py）
 curl -O https://raw.githubusercontent.com/kumabear917517/LuxTTS-API/main/app.py
 curl -O https://raw.githubusercontent.com/kumabear917517/LuxTTS-API/main/runapi.bat
 ```
@@ -183,6 +184,7 @@ except UnicodeDecodeError:
 
 ## 致谢
 
+- [LuxTTS-Gradio](https://github.com/NidAll/LuxTTS-Gradio) — LuxTTS 的 Gradio Web UI（本项目上游）
 - [LuxTTS](https://github.com/ysharma3501/LuxTTS) — 原始语音克隆模型
 - [ZipVoice](https://github.com/k2-fsa/ZipVoice) — 底层 TTS 架构
 - [Vocos](https://github.com/gemelo-ai/vocos.git) — 48kHz 声码器
